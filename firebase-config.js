@@ -1,20 +1,14 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  listAll,
-} from "firebase/storage";
+import { getStorage } from "firebase/storage";
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  apiKey: "AIzaSyAUvfdm8JiROklqq95rPxOPM2fwGd3_oIo",
+  storageBucket: "spacebox-test-41b55.appspot.com",
+  appId: "1:808303682411:web:43dc8b1fb7f3b26419a22e",
+  projectId: "spacebox-test-41b55",
+  authDomain: "spacebox-test-41b55.firebaseapp.com",
 };
 
 if (getApps.length === 0) {
@@ -24,4 +18,33 @@ if (getApps.length === 0) {
 const fbApp = getApp();
 const fbStorage = getStorage();
 
-export { fbApp, fbStorage };
+const uploadImage = async (uri, name) => {
+  const res = await fetch(uri);
+  const blob = await res.blob();
+
+  const imageRef = ref(getStorage(), `images/${name}`);
+
+  const uploadTask = uploadBytesResumable(imageRef, blob);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      },
+      (error) => {
+        reject(error);
+      },
+      async () => {
+        const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve({
+          downloadUrl,
+          metadata: uploadTask.snapshot.metadata,
+        });
+      }
+    );
+  });
+};
+
+export { fbApp, fbStorage, uploadImage };

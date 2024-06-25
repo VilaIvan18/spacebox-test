@@ -19,8 +19,8 @@ import {
   useCameraDevice,
   useCameraPermission,
 } from "react-native-vision-camera";
-import { uploadImage } from "@/firebase-config";
 import Loader from "@/components/Loader";
+import { uploadImage } from "@/firebase-config";
 
 const CameraScreen = () => {
   const camera = useRef<Camera>(null);
@@ -44,11 +44,13 @@ const CameraScreen = () => {
   //APROVE PHOTO AND LOAD TO FB
   const onAproveImage = async () => {
     try {
-      const fileName = capturedPhoto?.path.split("/").pop();
-      setLoading(true);
-      await uploadImage(capturedPhoto?.path, fileName).then(() => {
-        setLoading(false), navigation.goBack();
-      });
+      if (capturedPhoto) {
+        const fileName = capturedPhoto?.path.split("/").pop();
+        setLoading(true);
+        await uploadImage(capturedPhoto?.path, fileName).then(() => {
+          setLoading(false), navigation.goBack();
+        });
+      }
     } catch (error: any) {
       Alert.alert(error.message);
     }
